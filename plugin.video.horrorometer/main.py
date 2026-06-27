@@ -25,9 +25,9 @@ ADDON_HANDLE = int(sys.argv[1])
 ADDON_URL = sys.argv[0]
 
 BASE_URL = "https://horrorometer.com"
-API_BASE = f"{BASE_URL}/api/v1"
-OAUTH_DEVICE_CODE = f"{BASE_URL}/api/oauth/device/code"
-OAUTH_DEVICE_TOKEN = f"{BASE_URL}/api/oauth/device/token"
+API_BASE = "{}/api/v1".format(BASE_URL)
+OAUTH_DEVICE_CODE = "{}/api/oauth/device/code".format(BASE_URL)
+OAUTH_DEVICE_TOKEN = "{}/api/oauth/device/token".format(BASE_URL)
 OAUTH_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code"
 
 CLIENT_ID = "kodi-horrorometer-official"
@@ -45,7 +45,7 @@ def load_token():
         with open(TOKEN_FILE, "r") as f:
             data = json.load(f)
             return data.get("access_token")
-    except (IOOError, ValueError, KeyError):
+    except (OSError, ValueError, KeyError):
         return None
 
 
@@ -70,7 +70,7 @@ def auth_headers():
     token = load_token()
     if not token:
         return None
-    return {"Authorization": f"Bearer {token}"}
+    return {"Authorization": "Bearer {}".format(token)}
 
 
 # --- OAuth Device Flow -------------------------------------------------------
@@ -91,7 +91,7 @@ def start_device_flow():
     except requests.RequestException as e:
         xbmcgui.Dialog().ok(
             "Horrorometer",
-            f"Failed to start authorization.\n\n{e}",
+            "Failed to start authorization.\n\n{}".format(e),
         )
         return None
 
@@ -105,11 +105,13 @@ def start_device_flow():
     dialog = xbmcgui.Dialog()
     choice = dialog.ok(
         "Authorize Horrorometer",
-        f"Go to:\n{verification_url}\n\n"
-        f"and approve access for Kodi.\n\n"
-        f"Code: {user_code}\n\n"
-        f"Expires in {expires_in // 60} minutes.\n\n"
-        f"Press OK once you've approved, or Cancel to abort.",
+        "Go to:\n{}\n\n"
+        "and approve access for Kodi.\n\n"
+        "Code: {}\n\n"
+        "Expires in {} minutes.\n\n"
+        "Press OK once you've approved, or Cancel to abort.".format(
+            verification_url, user_code, expires_in // 60
+        ),
     )
     if not choice:
         return None
@@ -148,7 +150,7 @@ def start_device_flow():
             xbmcgui.Dialog().ok("Horrorometer", "The code expired. Please try again.")
             return None
         else:
-            xbmcgui.Dialog().ok("Horrorometer", f"Authorization failed: {err}")
+            xbmcgui.Dialog().ok("Horrorometer", "Authorization failed: {}".format(err))
             return None
 
     xbmcgui.Dialog().ok("Horrorometer", "The code expired. Please try again.")
@@ -174,14 +176,14 @@ def fetch_watchlist(status=None, content_type=None):
 
     try:
         resp = requests.get(
-            f"{API_BASE}/watchlist",
+            "{}/watchlist".format(API_BASE),
             headers=headers,
             params=params,
             timeout=15,
         )
     except requests.RequestException as e:
         xbmcgui.Dialog().notification(
-            "Horrorometer", f"Network error: {e}", xbmcgui.NOTIFICATION_ERROR
+            "Horrorometer", "Network error: {}".format(e), xbmcgui.NOTIFICATION_ERROR
         )
         return []
 
@@ -198,7 +200,7 @@ def fetch_watchlist(status=None, content_type=None):
     if resp.status_code != 200:
         xbmcgui.Dialog().notification(
             "Horrorometer",
-            f"Failed to fetch watchlist (HTTP {resp.status_code})",
+            "Failed to fetch watchlist (HTTP {})".format(resp.status_code),
             xbmcgui.NOTIFICATION_ERROR,
         )
         return []
@@ -215,7 +217,7 @@ def mark_watched(title_id):
 
     try:
         resp = requests.post(
-            f"{API_BASE}/watchlist/{title_id}/watch",
+            "{}/watchlist/{}/watch".format(API_BASE, title_id),
             headers=headers,
             timeout=15,
         )
@@ -229,7 +231,7 @@ def mark_watched(title_id):
 
 def build_url(query):
     """Build a plugin URL with the given query parameters."""
-    return f"{ADDON_URL}?{urllib.parse.urlencode(query)}"
+    return "{}?{}".format(ADDON_URL, urllib.parse.urlencode(query))
 
 
 def list_root():
@@ -279,12 +281,20 @@ def list_watchlist(content_type=None, status=None):
         list_root()
         return
 
+    if len(items) == 0:
+        xbmcgui.Dialog().notification(
+            "Horrorometer",
+            "Your watchlist is empty. Add titles at horrorometer.com",
+            xbmcgui.NOTIFICATION_INFO,
+        )
+        xbmcplugin.endOfDirectory(ADDON_HANDLE, succeeded=False)
+        return
+
     for item in items:
         title = item.get("title", "Unknown")
         year = item.get("year", "")
         poster = item.get("poster_url", "")
         watched = item.get("watched", False)
-        in_watchlist = item.get("in_watchlist", True)
         item_type = item.get("type", "movie")
         title_id = item.get("id", "")
         rating = item.get("user_rating_average")
@@ -292,9 +302,9 @@ def list_watchlist(content_type=None, status=None):
         synopsis = item.get("synopsis", "")
 
         # Build display label
-        label = f"{title} ({year})" if year else title
+        label = "{} ({})".format(title, year) if year else title
         if watched:
-            label = f"[Watched] {label}"
+            label = "[Watched] {}".format(label)
 
         listitem = xbmcgui.ListItem(label=label, offscreen=True)
         listitem.setInfo("video", {
@@ -311,29 +321,66 @@ def list_watchlist(content_type=None, status=None):
             if rating_count:
                 listitem.setProperty("rating_count", str(rating_count))
 
-        # Context menu: mark as watched
+        # Context menu: mark as watched (only via context menu, not click)
         if not watched:
             context_menu = [
-                ("Mark as Watched", f"RunPlugin({build_url({'action': 'watch', 'id': title_id})})")
+                ("Mark as Watched",
+                 "RunPlugin({})".format(build_url({"action": "watch", "id": title_id})))
             ]
             listitem.addContextMenuItems(context_menu)
 
+        # Clicking the item shows an info dialog — does NOT mark as watched.
+        # The mark-watched action is only via the context menu above.
         xbmcplugin.addDirectoryItem(
             ADDON_HANDLE,
-            build_url({"action": "watch", "id": title_id}),
+            build_url({"action": "info", "id": title_id}),
             listitem,
             isFolder=False,
         )
 
-    xbmcplugin.endOfDirectory(ADDON_HANDLE, succeeded=len(items) > 0)
+    xbmcplugin.endOfDirectory(ADDON_HANDLE, succeeded=True)
+
+
+def show_info(title_id):
+    """Show an info dialog for a title. Reads from the cached watchlist."""
+    # Re-fetch the single item — simplest approach since we don't cache.
+    items = fetch_watchlist()
+    if not items:
+        return
+
+    for item in items:
+        if item.get("id") == title_id:
+            title = item.get("title", "Unknown")
+            year = item.get("year", "")
+            synopsis = item.get("synopsis", "No synopsis available.")
+            rating = item.get("user_rating_average")
+            rating_count = item.get("user_rating_count")
+            watched = item.get("watched", False)
+
+            info_text = "{} ({})\n\n".format(title, year) if year else "{}\n\n".format(title)
+            if rating:
+                info_text += "Rating: {}/5".format(rating)
+                if rating_count:
+                    info_text += " ({} votes)".format(rating_count)
+                info_text += "\n"
+            if watched:
+                info_text += "Status: Watched\n"
+            info_text += "\n{}".format(synopsis)
+
+            xbmcgui.Dialog().textviewer("Horrorometer", info_text)
+            return
+
+    xbmcgui.Dialog().notification(
+        "Horrorometer", "Title not found.", xbmcgui.NOTIFICATION_WARNING
+    )
 
 
 def handle_action(action, title_id=None):
-    """Handle non-list actions: authorize, signout, mark watched."""
+    """Handle non-list actions: authorize, signout, mark watched, info."""
     if action == "authorize":
         token = start_device_flow()
         if token:
-            xbmc.executebuiltin(f"Container.Refresh")
+            xbmc.executebuiltin("Container.Refresh")
         return
 
     if action == "signout":
@@ -341,7 +388,7 @@ def handle_action(action, title_id=None):
         xbmcgui.Dialog().notification(
             "Horrorometer", "Signed out.", xbmcgui.NOTIFICATION_INFO
         )
-        xbmc.executebuiltin(f"Container.Refresh")
+        xbmc.executebuiltin("Container.Refresh")
         return
 
     if action == "watch":
@@ -350,12 +397,17 @@ def handle_action(action, title_id=None):
                 xbmcgui.Dialog().notification(
                     "Horrorometer", "Marked as watched!", xbmcgui.NOTIFICATION_INFO
                 )
-                xbmc.executebuiltin(f"Container.Refresh")
+                xbmc.executebuiltin("Container.Refresh")
             else:
                 xbmcgui.Dialog().notification(
                     "Horrorometer", "Failed to mark as watched.",
                     xbmcgui.NOTIFICATION_ERROR,
                 )
+        return
+
+    if action == "info":
+        if title_id:
+            show_info(title_id)
         return
 
 
@@ -375,6 +427,8 @@ def router():
         handle_action("signout")
     elif action == "watch":
         handle_action("watch", title_id)
+    elif action == "info":
+        handle_action("info", title_id)
     elif content_type or status:
         list_watchlist(content_type=content_type, status=status)
     else:
