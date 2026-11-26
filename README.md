@@ -11,22 +11,25 @@ Browse your [Horrorometer](https://horrorometer.com) watchlist on Kodi.
 
 ## Install
 
-1. In Kodi, go to **Settings → File manager → Add source**
-2. Add `https://sirnightowl.github.io/horrorometer-kodi/` as a source
-3. Go to **Add-ons → Install from zip file** → select the source → install `plugin.video.horrorometer-x.x.x.zip`
-4. Open the addon — it will show a code and URL
-5. Visit the URL on your phone/browser, sign in to Horrorometer, approve
-6. Your watchlist appears in Kodi
+1. Download the ZIP from the [install page](https://sirnightowl.github.io/horrorometer-kodi/) or build it from source below.
+2. In Kodi, enable **Settings → System → Add-ons → Unknown sources** for ZIP installation.
+3. Go to **Add-ons → Install from zip file** and select the downloaded ZIP.
+4. Open the add-on and select **Authorize Horrorometer**.
+5. On your phone or computer, visit the address shown in Kodi. Enter the code, sign in to Horrorometer, and approve access. Kodi opens the watchlist menu after approval.
+
+Select a title for details. Use its context menu to **Mark as Watched**. **Sign Out** removes the saved sign-in from that Kodi profile. You can revoke the device's access from [Horrorometer app settings](https://horrorometer.com/settings/apps).
 
 ## Build from source
 
+```bash
+./build.sh
 ```
-zip -r plugin.video.horrorometer.zip plugin.video.horrorometer/
-```
+
+The build needs Python 3.9 or later. It writes the ZIP to `dist/` and copies it into `docs/` for publishing.
 
 ## Requirements
 
-- Kodi 19+ (Matrix) or 21+ (Omega)
+- Kodi 19 (Matrix) or later
 - A Horrorometer account (free at [horrorometer.com](https://horrorometer.com))
 
 ## API docs

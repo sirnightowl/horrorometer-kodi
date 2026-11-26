@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.horrorometer" name="Horrorometer" version="0.1.0" provider-name="Horrorometer">
+<addon id="plugin.video.horrorometer" name="Horrorometer" version="0.1.1" provider-name="Horrorometer">
   <requires>
     <import addon="xbmc.python" version="3.0.0"/>
     <import addon="script.module.requests" version="2.31.0"/>
@@ -24,9 +24,7 @@ Requires a free Horrorometer account at horrorometer.com.
     <source>https://github.com/sirnightowl/horrorometer-kodi</source>
     <assets>
       <icon>icon.png</icon>
-      <fanart>fanart.jpg</fanart>
-      <screenshot>resources/screenshot01.jpg</screenshot>
     </assets>
-    <news>v0.1.0 — Initial release</news>
+    <news>Fix Kodi startup, device-code sign-in, and watchlist browsing.</news>
   </extension>
 </addon>

@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <addons>
-  <addon id="plugin.video.horrorometer" name="Horrorometer" version="0.1.0" provider-name="Horrorometer">
+  <addon id="plugin.video.horrorometer" name="Horrorometer" version="0.1.1" provider-name="Horrorometer">
     <requires>
-      <import addon="xbmc.python" version="3.0.0"/>
-      <import addon="script.module.requests" version="2.31.0"/>
+      <import addon="xbmc.python" version="3.0.0" />
+      <import addon="script.module.requests" version="2.31.0" />
     </requires>
     <extension point="xbmc.python.pluginsource" library="main.py">
       <provides>video</provides>
@@ -13,10 +13,10 @@
       <description lang="en">
 Connect Kodi to your Horrorometer account and browse your horror watchlist.
 Authorize via a simple code — no password needed on Kodi.
-      </description>
+    </description>
       <disclaimer lang="en">
 Requires a free Horrorometer account at horrorometer.com.
-      </disclaimer>
+    </disclaimer>
       <language>en</language>
       <platform>all</platform>
       <license>MIT</license>
@@ -26,7 +26,7 @@ Requires a free Horrorometer account at horrorometer.com.
       <assets>
         <icon>icon.png</icon>
       </assets>
-      <news>v0.1.0 — Initial release</news>
+      <news>Fix Kodi startup, device-code sign-in, and watchlist browsing.</news>
     </extension>
   </addon>
 </addons>

@@ -1,22 +1,9 @@
-# Horrorometer Kodi Repository
+# Horrorometer for Kodi
 
-Add this URL to Kodi's File Manager to install the Horrorometer addon:
-
-```
-https://sirnightowl.github.io/horrorometer-kodi/
-```
-
-## How to add
-
-1. Kodi → **Settings** → **File manager**
-2. **Add source** → enter the URL above → name it `Horrorometer`
-3. Go to **Add-ons** → **Install from zip file** → **Horrorometer**
-4. Install `plugin.video.horrorometer-0.1.0.zip`
-
-## Manual install
-
-You can also download the zip directly:
-- [Latest release](https://github.com/sirnightowl/horrorometer-kodi/releases/latest)
+1. Download [Horrorometer for Kodi v0.1.1](plugin.video.horrorometer-0.1.1.zip).
+2. In Kodi, go to **Settings → System → Add-ons** and enable **Unknown sources** for ZIP installation.
+3. Go to **Add-ons → Install from zip file** and select the ZIP.
+4. Open the add-on and select **Authorize Horrorometer**. On your phone or computer, visit the address shown in Kodi, enter the code, and approve access after signing in.
 
 ## Support
 
