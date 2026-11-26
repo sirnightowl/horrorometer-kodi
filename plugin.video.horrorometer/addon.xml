@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.horrorometer" name="Horrorometer" version="0.1.1" provider-name="Horrorometer">
+<addon id="plugin.video.horrorometer" name="Horrorometer" version="0.1.2" provider-name="Horrorometer">
   <requires>
     <import addon="xbmc.python" version="3.0.0"/>
     <import addon="script.module.requests" version="2.31.0"/>
+    <import addon="script.module.qrcode" version="6.1.0+matrix.1"/>
   </requires>
   <extension point="xbmc.python.pluginsource" library="main.py">
     <provides>video</provides>
@@ -25,6 +26,6 @@ Requires a free Horrorometer account at horrorometer.com.
     <assets>
       <icon>icon.png</icon>
     </assets>
-    <news>Fix Kodi startup, device-code sign-in, and watchlist browsing.</news>
+    <news>Scan a QR code to sign in on your phone. Manual activation remains available.</news>
   </extension>
 </addon>

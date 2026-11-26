@@ -16,7 +16,9 @@ version = manifest.attrib["version"]
 if sys.argv[1] and sys.argv[1] != version:
     raise SystemExit(f"Version {sys.argv[1]} does not match addon.xml ({version}).")
 
-files = [addon / "addon.xml", addon / "main.py"]
+files = [addon / "addon.xml", addon / "main.py", addon / "activation.py"]
+files.extend(sorted((addon / "resources").rglob("*.xml")))
+files.extend(sorted((addon / "resources").rglob("*.png")))
 files.extend(addon / asset.text for asset in manifest.findall(".//assets/*"))
 for path in [*files, Path("LICENSE")]:
     if not path.is_file():

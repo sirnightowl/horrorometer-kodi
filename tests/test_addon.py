@@ -35,6 +35,8 @@ class AddonTest(unittest.TestCase):
         self.gui = modules["xbmcgui"]
         self.plugin = modules["xbmcplugin"]
         self.xbmc.executebuiltin = Mock()
+        self.xbmc.log = Mock()
+        self.xbmc.LOGWARNING = 2
         self.gui.Dialog = Mock()
         self.gui.DialogProgress = Mock()
         self.gui.DialogProgress.return_value.iscanceled.return_value = False
@@ -96,6 +98,36 @@ class AddonTest(unittest.TestCase):
 
         self.enter(patch("requests.post", side_effect=post))
         return poll_times
+
+    def test_qr_uses_the_issued_horrorometer_link(self):
+        manual = "https://horrorometer.com/activate"
+        complete = f"{manual}?code=ABCD2345"
+        activation = ModuleType("activation")
+        activation.QrActivationDialog = Mock()
+        with patch.dict(sys.modules, {"activation": activation}):
+            dialog = self.addon["open_activation_dialog"](manual, "ABCD2345", complete)
+
+        self.assertEqual(dialog, activation.QrActivationDialog.return_value)
+        activation.QrActivationDialog.assert_called_once_with(
+            str(self.token_file.parent), manual, "ABCD2345", complete
+        )
+        self.gui.DialogProgress.assert_not_called()
+
+    def test_untrusted_or_unavailable_qr_uses_manual_url_and_code(self):
+        manual = "https://horrorometer.com/activate"
+        activation = ModuleType("activation")
+        activation.QrActivationDialog = Mock(side_effect=RuntimeError)
+        with patch.dict(sys.modules, {"activation": activation}):
+            for complete in (
+                "https://other.example/activate?code=ABCD2345",
+                f"{manual}?code=DIFFERENT",
+                f"{manual}?code=ABCD2345",
+            ):
+                dialog = self.addon["open_activation_dialog"](manual, "ABCD2345", complete)
+                self.assertEqual(dialog, self.gui.DialogProgress.return_value)
+                self.assertIn(manual, dialog.create.call_args.args[1])
+                self.assertIn("ABCD2345", dialog.create.call_args.args[1])
+        activation.QrActivationDialog.assert_called_once()
 
     def test_device_sign_in_then_all_watchlist(self):
         self.route()

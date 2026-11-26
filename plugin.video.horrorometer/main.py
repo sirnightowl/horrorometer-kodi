@@ -104,6 +104,34 @@ def auth_headers():
 
 # --- OAuth Device Flow -------------------------------------------------------
 
+def open_activation_dialog(verification_url, user_code, complete_url):
+    if isinstance(complete_url, str):
+        try:
+            manual = urllib.parse.urlsplit(verification_url)
+            complete = urllib.parse.urlsplit(complete_url)
+            if (
+                manual.scheme == "https"
+                and (complete.scheme, complete.netloc, complete.path)
+                == (manual.scheme, manual.netloc, manual.path)
+                and urllib.parse.parse_qs(complete.query).get("code") == [user_code]
+            ):
+                from activation import QrActivationDialog
+
+                return QrActivationDialog(
+                    ADDON.getAddonInfo("path"), verification_url, user_code, complete_url
+                )
+        except (ImportError, OSError, RuntimeError, ValueError):
+            xbmc.log("Horrorometer: QR unavailable; showing the manual code.", xbmc.LOGWARNING)
+
+    progress = xbmcgui.DialogProgress()
+    progress.create(
+        "Authorize Horrorometer",
+        "On your phone or computer, visit {}.\nEnter code {} and approve access for Kodi."
+        .format(verification_url, user_code),
+    )
+    return progress
+
+
 def start_device_flow():
     """
     Initiate the OAuth Device Flow. Shows the user code on screen and
@@ -136,12 +164,9 @@ def start_device_flow():
 
     deadline = time.monotonic() + expires_in
     monitor = xbmc.Monitor()
-    progress = xbmcgui.DialogProgress()
-    message = (
-        "On your phone or computer, go to {}.\n"
-        "Enter code {} and approve access for Kodi."
-    ).format(verification_url, user_code)
-    progress.create("Authorize Horrorometer", message)
+    progress = open_activation_dialog(
+        verification_url, user_code, data.get("verification_uri_complete")
+    )
     error = "The code expired. Please try again."
     try:
         next_poll = time.monotonic() + interval
@@ -149,7 +174,7 @@ def start_device_flow():
             if progress.iscanceled() or monitor.abortRequested():
                 return None
             now = time.monotonic()
-            progress.update(int((1 - max(0, deadline - now) / expires_in) * 100), message)
+            progress.update(int((1 - max(0, deadline - now) / expires_in) * 100))
             if now < next_poll:
                 if monitor.waitForAbort(min(0.5, next_poll - now, max(0, deadline - now))):
                     return None

@@ -15,7 +15,7 @@ Browse your [Horrorometer](https://horrorometer.com) watchlist on Kodi.
 2. In Kodi, enable **Settings → System → Add-ons → Unknown sources** for ZIP installation.
 3. Go to **Add-ons → Install from zip file** and select the downloaded ZIP.
 4. Open the add-on and select **Authorize Horrorometer**.
-5. On your phone or computer, visit the address shown in Kodi. Enter the code, sign in to Horrorometer, and approve access. Kodi opens the watchlist menu after approval.
+5. Scan the QR code with your phone camera, then sign in to Horrorometer and approve access. You can also visit the URL shown on the TV and enter the displayed code. Kodi opens the watchlist menu after approval.
 
 Select a title for details. Use its context menu to **Mark as Watched**. **Sign Out** removes the saved sign-in from that Kodi profile. You can revoke the device's access from [Horrorometer app settings](https://horrorometer.com/settings/apps).
 
